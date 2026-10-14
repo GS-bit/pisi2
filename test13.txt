@@ -1,0 +1,6 @@
+5 5
+0 0 K F A
+0 0 L G B
+0 0 M H C
+0 0 0 I D
+0 0 R J E

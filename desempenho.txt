@@ -1,0 +1,26 @@
+-> Testes executados em um Intel(R) Core(TM) 3 100U 4.7 GHz 8 threads
+
+
+=============== Para 10 pontos =================
+Algoritmo executado com sucesso em 1.98s
+Rota a ser percorrida: I H G F A B C D E J
+Distância necessária: 12
+
+
+=============== Para 11 pontos =================
+Algoritmo executado com sucesso em 24.5s
+Rota a ser percorrida: I H G K F A B C D E J
+Distância necessária: 14
+
+
+=============== Para 12 pontos =================
+Algoritmo executado com sucesso em 330.97s
+Rota a ser percorrida: I H G L K F A B C D E J
+Distância necessária: 14
+
+
+=============== Para 13 pontos =================
+
+Algoritmo executado com sucesso em 5634.58s
+Rota a ser percorrida: M K L G F A B C H I D E J
+Distância necessária: 16
