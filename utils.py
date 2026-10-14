@@ -1,5 +1,7 @@
 from itertools import permutations
 
+import time
+
 def ler_mundo(arquivo: str) -> list:
     """
     Lê um arquivo contendo as coordenadas dos pontos de entrega de comida e do ponto de retorno do drone.
@@ -97,6 +99,8 @@ def obter_percurso(mundo: list) -> tuple:
         menor_distancia = float("inf")
         melhor_percurso = None
 
+        inicio_tempo = time.time()
+
         for percurso in permutations(entregas):
 
             distancia_total = 0
@@ -118,6 +122,8 @@ def obter_percurso(mundo: list) -> tuple:
             if distancia_total < menor_distancia:
                 menor_distancia = distancia_total
                 melhor_percurso = percurso
+
+        print(f"Algoritmo executado com sucesso em {round(time.time() - inicio_tempo, 2)}s")
 
         resultado = (" ".join(ponto[0] for ponto in melhor_percurso), menor_distancia)
 
