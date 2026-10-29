@@ -17,6 +17,7 @@ Código desenvolvido a partir de um original fornecido em aula.
 
 import random
 
+import numpy as np
 import pygad
 
 def custo_caminho(permutacao: list[int], dic_distancias: dict[tuple[int, int], int]) -> int:
@@ -81,18 +82,110 @@ def calcular_aptidao(populacao: list[list[int]], dic_distancias: dict[tuple[int,
 		lista_aptidao.append(custo_caminho(elem, dic_distancias))
 	return lista_aptidao
 	
-def calcular_resultado(populacao: list[list[int]]) -> tuple[list[int], int]:
+def calcular_resultado(populacao: list[list[int]], dic_distancias: dict[tuple[int, int], int]) -> tuple[list[int], int]:
 	"""
-	Cálculo do resultado da análise do caixeiro viajante.
+	Cálculo do resultado da análise do caixeiro viajante. É usado como operador de cruzamento o Order Crossover e como de mutação o Inversion Mutation.
 	
 	Argumentos:
 		populacao: população inicial.
+		dic_distancias: dicionário de distâncias do problema.
 		
 	Retorno:
 		Tupla com a rota final a ser indicada pelo programa (primeira posição) e seu custo (segunda posição).
 	"""
 	
-	pass
+	if not populacao:
+		raise ValueError("A população não pode estar vazia.")
+
+	quantidade_cidades = len(populacao[0])
+
+	if quantidade_cidades < 2:
+		raise ValueError("A rota precisa conter pelo menos duas cidades.")
+
+	if any(len(rota) != quantidade_cidades for rota in populacao):
+		raise ValueError("Todas as rotas devem ter o mesmo número de cidades.")
+
+	def funcao_aptidao(ga, solucao, indice):
+		custo = custo_caminho(
+			[int(cidade) for cidade in solucao],
+			dic_distancias
+		)
+		return 1.0 / custo
+
+	def order_crossover(pais, tamanho_filhos, ga):
+		filhos = []
+
+		for i in range(tamanho_filhos[0]):
+			pai1 = [int(cidade) for cidade in pais[i % len(pais)]]
+			pai2 = [int(cidade) for cidade in pais[(i + 1) % len(pais)]]
+
+			inicio, fim = sorted(
+				random.sample(range(quantidade_cidades), 2)
+			)
+
+			filho = [None] * quantidade_cidades
+			filho[inicio:fim + 1] = pai1[inicio:fim + 1]
+
+			genes_restantes = [
+				cidade
+				for cidade in pai2[fim + 1:] + pai2[:fim + 1]
+				if cidade not in filho
+			]
+
+			posicoes = (
+				list(range(fim + 1, quantidade_cidades))
+				+ list(range(0, fim + 1))
+			)
+
+			posicoes_livres = [
+				posicao for posicao in posicoes
+				if filho[posicao] is None
+			]
+
+			for posicao, cidade in zip(posicoes_livres, genes_restantes):
+				filho[posicao] = cidade
+
+			filhos.append(filho)
+
+		return np.array(filhos, dtype=int)
+
+	def inversion_mutation(filhos, ga):
+		for i in range(len(filhos)):
+			if random.random() < 0.20:
+				inicio, fim = sorted(
+					random.sample(range(quantidade_cidades), 2)
+				)
+				filhos[i, inicio:fim + 1] = (
+					filhos[i, inicio:fim + 1][::-1]
+				)
+
+		return filhos
+
+	algoritmo = pygad.GA(
+		num_generations=500,
+		sol_per_pop=len(populacao),
+		num_parents_mating=min(20, len(populacao)),
+		num_genes=quantidade_cidades,
+		gene_type=int,
+		gene_space=list(range(1, quantidade_cidades + 1)),
+		allow_duplicate_genes=False,
+		initial_population=populacao,
+		fitness_func=funcao_aptidao,
+		parent_selection_type="tournament",
+		K_tournament=3,
+		keep_elitism=min(2, len(populacao)),
+		crossover_type=order_crossover,
+		mutation_type=inversion_mutation,
+		random_seed=42
+	)
+
+	algoritmo.run()
+
+	melhor_solucao, _, _ = algoritmo.best_solution()
+	melhor_rota = [int(cidade) for cidade in melhor_solucao]
+	melhor_custo = custo_caminho(melhor_rota, dic_distancias)
+
+	return melhor_rota, melhor_custo
 
 def main() -> None:
 	"""
@@ -126,7 +219,7 @@ def main() -> None:
 			
 	populacao = inicializar_populacao(100, 58) # População inicial.
 	
-	resultado = calcular_resultado(populacao)  # Tupla com a rota final a ser indicada pelo programa (primeira posição) e seu custo (segunda posição).
+	resultado = calcular_resultado(populacao, distancias)  # Tupla com a rota final a ser indicada pelo programa (primeira posição) e seu custo (segunda posição).
 	
 	# Exibição do resultado:
 	if resultado:
