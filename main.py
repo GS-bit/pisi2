@@ -236,6 +236,41 @@ def main() -> None:
         print(f"Rota encontrada: {resultado[0]}")
         print(f"Seu custo: {resultado[1]}")
 
+	objeto_arq = open("test13.tsp")
+	
+	# Para obter uma lista onde cada objeto será uma string grande representando uma linha do arquivo, descomente isto:
+	#lista_linhas = objeto_arq.readlines()  # Cada linha terá um <ENTER> junto com o último elemento.
+	
+	# Dicionário de distâncias, onde as chaves são tuplas no formato (cidade_inicial, cidade_destino) e seus valores são as distâncias da cidade_inicial à cidade_destino:
+	distancias = {}  
+	
+	for i in range(1, 14): # Será iterado das linhas 1 a 57, pois a 58 não possui aresta.
+		linha = objeto_arq.readline() # Lê somente uma linha do arquivo.
+		
+		# Transformando a linha em lista de strings:
+		lista = linha.split()
+	
+		for j in range(i+1, 15): # Iteração nas colunas i+1 a 58.
+			if len(lista) > 0:
+				peso = int(lista.pop(0))
+			else:
+				print(f"Erro! linha {i} do arquivo não possui elementos suficientes")
+				exit()
+				
+			# Gravando a aresta em (i, j) e (j, i):
+			distancias[(i,j)] = peso
+			distancias[(j,i)] = peso
+			
+	populacao = inicializar_populacao(100, 14) # População inicial.
+	
+	resultado = calcular_resultado(populacao, distancias)  # Tupla com a rota final a ser indicada pelo programa (primeira posição) e seu custo (segunda posição).
+	
+	# Exibição do resultado:
+	if resultado:
+		print(f"Rota encontrada: {resultado[0]}")
+		print(f"Seu custo: {resultado[1]}")
+	
+	objeto_arq.close()		
 		
 		
 if __name__ == "__main__":
