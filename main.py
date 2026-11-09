@@ -162,7 +162,7 @@ def calcular_resultado(populacao: list[list[int]], dic_distancias: dict[tuple[in
 		return filhos
 
 	algoritmo = pygad.GA(
-		num_generations=500,
+		num_generations=3000,
 		sol_per_pop=len(populacao),
 		num_parents_mating=min(20, len(populacao)),
 		num_genes=quantidade_cidades,
@@ -187,10 +187,54 @@ def calcular_resultado(populacao: list[list[int]], dic_distancias: dict[tuple[in
 
 	return melhor_rota, melhor_custo
 
+
 def main() -> None:
-	"""
-	Função principal.
-	"""
+    """
+    Função principal.
+    """
+
+    with open("brazil58.tsp", "r") as objeto_arq:
+        linhas = objeto_arq.readlines()
+
+    # Localiza o início da matriz de distâncias.
+    inicio = linhas.index("EDGE_WEIGHT_SECTION\n")
+
+    # Lê todos os pesos, independentemente das quebras de linha.
+    valores = []
+
+    for linha in linhas[inicio + 1:]:
+        if linha.strip() == "EOF":
+            break
+        valores.extend(linha.split())
+
+    # Uma matriz UPPER_ROW de 58 cidades possui 1653 distâncias.
+    if len(valores) != 1653:
+        raise ValueError(
+            f"Quantidade incorreta de distâncias: {len(valores)}. "
+            "Esperado: 1653."
+        )
+
+    distancias = {}
+    indice = 0
+
+    # Monta o dicionário de distâncias.
+    for i in range(1, 59):
+        for j in range(i + 1, 59):
+            peso = int(valores[indice])
+            indice += 1
+
+            distancias[(i, j)] = peso
+            distancias[(j, i)] = peso
+
+    populacao = inicializar_populacao(300, 58)
+
+    resultado = calcular_resultado(
+        populacao, distancias
+    )
+
+    if resultado:
+        print(f"Rota encontrada: {resultado[0]}")
+        print(f"Seu custo: {resultado[1]}")
 
 	objeto_arq = open("test13.tsp")
 	
